@@ -3,6 +3,7 @@ package com.qfedu.fmmall.service.impl;
 import com.qfedu.fmmall.dao.UsersMapper;
 import com.qfedu.fmmall.entity.Users;
 import com.qfedu.fmmall.service.UserService;
+import com.qfedu.fmmall.utils.Base64Utils;
 import com.qfedu.fmmall.utils.MD5Utils;
 import com.qfedu.fmmall.vo.ResStatus;
 import com.qfedu.fmmall.vo.ResultVO;
@@ -61,7 +62,9 @@ public class UserServiceImpl implements UserService {
         }else{
             String md5Pwd = MD5Utils.md5(pwd);
             if(md5Pwd.equals(users.get(0).getPassword())){
-                return new ResultVO(ResStatus.OK,"登录成功",users.get(0));
+
+
+                return new ResultVO(ResStatus.OK,"token",users.get(0));
             }else{
                 return new ResultVO(ResStatus.NO,"登录失败，密码错误",null);
             }
