@@ -3,17 +3,21 @@ package com.qfedu.fmmall.service.impl;
 import com.qfedu.fmmall.dao.UsersMapper;
 import com.qfedu.fmmall.entity.Users;
 import com.qfedu.fmmall.service.UserService;
-import com.qfedu.fmmall.utils.Base64Utils;
 import com.qfedu.fmmall.utils.MD5Utils;
 import com.qfedu.fmmall.vo.ResStatus;
 import com.qfedu.fmmall.vo.ResultVO;
+import io.jsonwebtoken.JwtBuilder;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
 
 import javax.annotation.Resource;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -62,9 +66,19 @@ public class UserServiceImpl implements UserService {
         }else{
             String md5Pwd = MD5Utils.md5(pwd);
             if(md5Pwd.equals(users.get(0).getPassword())){
+                //生成token
+//                此map存放一些需要放到token里面的用户信息
+                Map<String,Object> map=new HashMap<>();
+                map.put("key1","fuckyou!");
+                JwtBuilder builder = Jwts.builder();
+                String token = builder.setSubject(username)//jwt payload里面的内容
+                        .setIssuedAt(new Date())//设置token生成时间
+                        .setId(users.get(0).getUserId() + "")//设置token的id为用户id
+                        .setClaims(map)//map里面可以存放一些用户角色权限信息
+                        .setExpiration(new Date(System.currentTimeMillis() + 24 * 60 * 60 * 1000))//设置token到期时间为1天
+                        .signWith(SignatureAlgorithm.HS256, "helloworld").compact();//设置hash函数和密码
 
-
-                return new ResultVO(ResStatus.OK,"token",users.get(0));
+                return new ResultVO(ResStatus.OK,token,users.get(0));
             }else{
                 return new ResultVO(ResStatus.NO,"登录失败，密码错误",null);
             }
